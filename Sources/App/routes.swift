@@ -12,8 +12,15 @@ func routes(_ app: Application) throws {
     }
 
     app.get("hello") { req -> EventLoopFuture<String> in
-        let response = req.client.get("https://dog.ceo/api/breeds/image/random").map { "\($0)" }
+        let response = req.client.get("https://dog.ceo/api/breeds/image/random").flatMapThrowing { response in
+            try response.content.decode(Dog.self)
+        }.map { $0.message }
+        
         return response
+    }
+    
+    struct Dog: Decodable {
+        let message: String
     }
     
     let bucket = "my-bucket"
