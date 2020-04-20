@@ -1,5 +1,6 @@
 import Vapor
 import S3
+import Foundation
 
 func routes(_ app: Application) throws {
     app.get { req -> String in
@@ -15,6 +16,21 @@ func routes(_ app: Application) throws {
         let response = req.client.get("https://dog.ceo/api/breeds/image/random").flatMapThrowing { response in
             try response.content.decode(Dog.self)
         }.map { $0.message }
+        
+        let dispatchGroup = DispatchGroup()
+        dispatchGroup.enter()
+        
+        response.whenComplete { result in
+            switch result {
+            case .success(let string):
+                print(string) // The actual String
+            case .failure(let error):
+                print(error) // A Swift Error
+            }
+            dispatchGroup.leave()
+        }
+        
+        dispatchGroup.wait()
         
         return response
     }
