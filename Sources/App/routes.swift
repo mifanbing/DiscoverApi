@@ -11,8 +11,9 @@ func routes(_ app: Application) throws {
         }
     }
 
-    app.get("hello") { req -> String in
-        return "Hello, world!"
+    app.get("hello") { req -> EventLoopFuture<String> in
+        let response = req.client.get("https://dog.ceo/api/breeds/image/random").map { "\($0)" }
+        return response
     }
     
     let bucket = "my-bucket"
